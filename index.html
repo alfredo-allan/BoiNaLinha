@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco Academy | Otimização Estrutural PVST+ e Load Balancing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <button class="menu-toggle" id="openMenu">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+    </button>
+    <div class="badge-lab" style="margin-bottom: 0; font-weight: 600;">
+        <i class="fas fa-ethernet"></i> Cisco Networking Academy | CCNA 2
+    </div>
+    <a href="#download" class="btn-outline">
+        <i class="fas fa-download"></i> Arquivo .PKT
+    </a>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3><i class="fas fa-compass"></i> Navegação</h3>
+        <button class="close-sidebar" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <ul class="nav-modules">
+        <li><a href="#secao-cenario"><i class="fas fa-info-circle"></i> Cenário & Plantão</a></li>
+        <li><a href="#secao-topologia"><i class="fas fa-project-diagram"></i> 1.1 Mapa de 6 Switches</a></li>
+        <li><a href="#secao-diagnostico"><i class="fas fa-search-minus"></i> 1.2 Depuração dos Logs</a></li>
+        <li><a href="#secao-glossario"><i class="fas fa-book"></i> 1.3 Glossário de Termos</a></li>
+        <li><a href="#secao-analogia"><i class="fas fa-graduation-cap"></i> 1.4 Caso de Uso Humandizado</a></li>
+        <li><a href="#secao-scripts"><i class="fas fa-terminal"></i> 2.1 Scripts Limpos de CLI</a></li>
+        <li><a href="#secao-justificativa"><i class="fas fa-code-branch"></i> 2.2 Justificativa de Comandos</a></li>
+        <li><a href="#download"><i class="fas fa-cloud-download-alt"></i> Download Encerramento</a></li>
+    </ul>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<section class="hero">
+    <div class="container">
+        <span class="badge-lab">Plano de Auditoria e Engenharia de Tráfego</span>
+        <h1>Otimização de Redes Chaveadas PVST+</h1>
+        <p style="color: var(--text-dim);">Distribuição lógica de carga de VLANs (30 a 140) entre switches modulares de Core e mitigação de hijacking de Root Bridge.</p>
+    </div>
+</section>
+
+<div class="container">
+
+    <section id="secao-cenario" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            <span class="section-number">1.0</span> Diretrizes do Plantão Técnico
+        </h2>
+        <div class="card">
+            <p>
+                Este laboratório reflete um desafio real de infraestrutura de redes. Fomos acionados para auditar um sistema complexo composto por dois switches multicamada de Core/Distribuição e quatro switches de acesso de Base, interconectados por malhas redundantes físicas que operam de forma ineficiente.
+            </p>
+            <div class="alert alert-info">
+                <i class="fas fa-quote-left"></i> <strong>Mensagem do Plantão:</strong> <em>"Noites assim se repetirão, oportunidades não. Utilize a CLI para auditar as portas designadas, root ports e travar o Load Balanced."</em>
+            </div>
+        </div>
+    </section>
+
+    <section id="secao-topologia" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-project-diagram"></i>
+            <span class="section-number">1.1</span> Espaço Visual da Topologia Hierárquica
+        </h2>
+        <div class="card">
+            <p style="margin-bottom: 1.5rem;">O arranjo abaixo ilustra as conexões de uplinks modulares redundantes. A renderização de imagem é totalmente responsiva, adaptando-se de forma dinâmica de acordo com o ecrã:</p>
+            
+            <div style="width: 100%; max-width: 760px; margin: 0 auto 1.5rem auto; background: #141414; padding: 12px; border: 1px solid var(--border); border-radius: 12px; display: flex; justify-content: center; align-items: center;">
+                <img src="./Captura de tela 2026-07-01 211338.png" alt="Topologia de Rede do Laboratório contendo CORE 1, CORE 2 e BASE 1 a 4" style="width: 100%; height: auto; display: block; border-radius: 8px;">
+            </div>
+
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Identificação do Switch</th>
+                        <th>VLANs Ativas (Passo de 10)</th>
+                        <th>Comportamento STP (Ímpar)</th>
+                        <th>Comportamento STP (Par)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CORE_1</strong></td>
+                        <td>30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140</td>
+                        <td><span style="color: var(--success); font-weight: 600;">SW ROOT Principal</span></td>
+                        <td><span style="color: var(--info); font-weight: 600;">SW ROOT Reserva</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CORE_2</strong></td>
+                        <td>30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140</td>
+                        <td><span style="color: var(--info); font-weight: 600;">SW ROOT Reserva</span></td>
+                        <td><span style="color: var(--success); font-weight: 600;">SW ROOT Principal</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>BASE_1 a BASE_4</strong></td>
+                        <td>30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140</td>
+                        <td><span style="color: var(--text-dim);">NON ROOT (Escravo)</span></td>
+                        <td><span style="color: var(--text-dim);">NON ROOT (Escravo)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="secao-diagnostico" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-search-minus"></i>
+            <span class="section-number">1.2</span> Condições Encontradas e Depuração dos Logs Inicial e Final
+        </h2>
+        <div class="card">
+            <p style="margin-bottom: 1.2rem;">A análise técnica reversa feita a partir das evidências do terminal nos trouxe os seguintes achados operacionais:</p>
+            
+            <div class="alert alert-danger">
+                <i class="fas fa-bug"></i> <strong>A Condição Inicial ("Boi na Linha"):</strong><br>
+                Nos logs primários de <code>show spanning-tree active</code>, a Root Bridge ativa da rede apontava para o endereço MAC <code>0005.5E9D.5B17</code> com prioridade <code>24577</code>. Esse ID não pertencia a nenhum switch de Core! Isso provou que um switch de acesso da camada de Base roubou a eleição central da topologia devido a um erro crônico de prioridade padrão, deixando a rede lenta e instável.
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> <strong>A Pegadinha das Portas Modulares do Core:</strong><br>
+                A CLI rejeitava comandos horizontais sequenciais como <code>interface range g0/1 - 4</code>. O comando <code>show interfaces status</code> revelou que esse switch modular expande a numeração mudando o barramento do slot inicial (<code>Gig0/1, Gig1/1, Gig2/1...</code>), forçando o uso estruturado de <strong>vírgulas</strong> na sintaxe do range.
+            </div>
+
+            <div class="alert alert-success">
+                <i class="fas fa-check-double"></i> <strong>A Condição Final de Sucesso (Depuração):</strong><br>
+                Após a aplicação correta dos scripts, os comandos finais de validação registraram vitória absoluta. A VLAN 30 no CORE_1 e a VLAN 40 no CORE_2 exibem a flag de autoridade máxima: <span style="color: var(--success); font-weight: bold;">This bridge is the root</span>. Todas as interfaces modulares conectadas assumiram o papel de <strong>Desg FWD</strong> (Designadas), indicando balanceamento perfeito.
+            </div>
+        </div>
+    </section>
+
+    <section id="secao-glossario" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-book"></i>
+            <span class="section-number">1.3</span> Glossário Técnico Spanning Tree (CCNA)
+        </h2>
+        <div class="card">
+            <dl style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-dim);">
+                <dt style="color: var(--primary); font-weight: 600; font-family: monospace;">SW ROOT (Root Bridge):</dt>
+                <dd style="margin-left: 1rem; color: var(--text);">O switch central eleito como "rei da rede" Spanning Tree. É a partir dele que todos os caminhos mais rápidos são calculados. Ele nunca possui portas bloqueadas.</dd>
+                
+                <dt style="color: var(--primary); font-weight: 600; font-family: monospace;">SW NON ROOT:</dt>
+                <dd style="margin-left: 1rem; color: var(--text);">Switches subordinados que precisam obedecer às rotas calculadas pelo SW ROOT, aceitando bloqueios preventivos de portas em seus uplinks redundancy para suprimir loops.</dd>
+                
+                <dt style="color: var(--primary); font-weight: 600; font-family: monospace;">Root Port (Porta Raiz / Root FWD):</dt>
+                <dd style="margin-left: 1rem; color: var(--text);">A porta do switch Non-Root que oferece o caminho mais rápido e de menor custo de velocidade até chegar à Root Bridge.</dd>
+                
+                <dt style="color: var(--primary); font-weight: 600; font-family: monospace;">Alternative Port (Modo BLK / Altn BLK):</dt>
+                <dd style="margin-left: 1rem; color: var(--text);">Porta reserva identificada em estado de bloqueio lógico. Ela não transmite dados comuns dos usuários, servindo apenas de backup caso o link principal sofra um rompimento.</dd>
+            </dl>
+        </div>
+    </section>
+
+    <section id="secao-analogia" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-graduation-cap"></i>
+            <span class="section-number">1.4</span> Caso de Uso Humanizado: O Equilíbrio das Linhas de Comboio
+        </h2>
+        <div class="card">
+            <p>Para simplificar a engenharia de tráfego, imagine o sistema de transporte ferroviário de uma grande metrópole gerenciado por duas grandes estações centrais: **Estação Alfa (CORE 1)** e **Estação Beta (CORE 2)**, que recebem passageiros vindos de quatro terminais de bairro (BASE 1 a 4).</p>
+            
+            <div class="alert alert-danger">
+                <i class="fas fa-train"></i> <strong>O Cenário com Boi na Linha (Sobrecarga de Rotas):</strong><br>
+                Se todos os comboios da cidade (as VLANs) decidissem viajar usando apenas os trilhos que levam à Estação Alfa, a Estação Beta ficaria completamente vazia e ociosa. Pior: se um pequeno terminal de bairro decidisse mandar nas chaves dos trilhos, a malha ferroviária inteira sofreria atrasos bizarros por falta de potência de processamento.
+            </div>
+
+            <div class="alert alert-success">
+                <i class="fas fa-subway"></i> <strong>A Engenharia com Load Balancing PVST+:</strong><br>
+                Nós entramos em ação e ativamos uma regra matemática inteligente de balanceamento: Comboios com numeração Ímpar (VLANs 30, 50, 70...) desembarcam na potente Estação Alfa. Comboios com numeração Par (VLANs 40, 60, 80...) desembarcarão na Estação Beta. Travamos as prioridades dos bairros para que nenhum terminal menor tente roubar o controle. Se uma estação central falhar, a outra assume 100% da malha de comboios sem gerar colisões.
+            </div>
+        </div>
+    </section>
+
+    <section id="secao-scripts" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-terminal"></i>
+            <span class="section-number">2.1</span> Scripts Técnicos e Configurações de CLI Consolidadas
+        </h2>
+        <div class="card">
+            <p>Abaixo estão estruturados os scripts limpos e funcionais executados de forma sequencial na rede:</p>
+            
+            <h4 style="color: var(--primary); margin-bottom: 0.5rem;"><i class="fas fa-database"></i> 1. Script de Criação e Nomeação de VLANs (Injetado em TODOS os 6 Switches)</h4>
+            <div class="terminal">
+<pre>(config)# vlan 30
+(config-vlan)# name Financeiro
+(config-vlan)# vlan 40
+(config-vlan)# name Recursos_Humanos
+(config-vlan)# vlan 50
+(config-vlan)# name Operacoes
+(config-vlan)# vlan 60
+(config-vlan)# name Logistica
+(config-vlan)# vlan 70
+(config-vlan)# name TI_Suporte
+(config-vlan)# vlan 80
+(config-vlan)# name Diretoria
+(config-vlan)# vlan 90
+(config-vlan)# name Marketing
+(config-vlan)# vlan 100
+(config-vlan)# name Controladoria
+(config-vlan)# vlan 110
+(config-vlan)# name Juridico
+(config-vlan)# vlan 120
+(config-vlan)# name Seguranca
+(config-vlan)# vlan 130
+(config-vlan)# name Visitantes
+(config-vlan)# vlan 140
+(config-vlan)# name Gerenciamento
+(config-vlan)# exit</pre>
+            </div>
+
+            <h4 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.5rem;"><i class="fas fa-cube"></i> 2. Configuração de Troncos e Load Balanced no CORE_1</h4>
+            <div class="terminal">
+<pre>CORE_1# configure terminal
+CORE_1(config)# hostname CORE_1
+! Ativação dos Troncos nas portas modulares utilizando vírgulas
+CORE_1(config)# interface range gigabitEthernet 0/1 , gigabitEthernet 1/1 , gigabitEthernet 2/1 , gigabitEthernet 3/1
+CORE_1(config-if-range)# switchport mode trunk
+CORE_1(config-if-range)# exit
+! Engenharia Spanning Tree: Raiz das VLANs Ímpares
+CORE_1(config)# spanning-tree vlan 30,50,70,90,110,130 root primary
+CORE_1(config)# spanning-tree vlan 40,60,80,100,120,140 root secondary
+CORE_1(config)# end
+CORE_1# write</pre>
+            </div>
+
+            <h4 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.5rem;"><i class="fas fa-cube"></i> 3. Configuração de Troncos e Load Balanced no CORE_2</h4>
+            <div class="terminal">
+<pre>CORE_2# configure terminal
+CORE_2(config)# hostname CORE_2
+! Ativação dos Troncos
+CORE_2(config)# interface range gigabitEthernet 0/1 , gigabitEthernet 1/1 , gigabitEthernet 2/1 , gigabitEthernet 3/1
+CORE_2(config-if-range)# switchport mode trunk
+CORE_2(config-if-range)# exit
+! Engenharia Spanning Tree: Raiz das VLANs Pares
+CORE_2(config)# spanning-tree vlan 40,60,80,100,120,140 root primary
+CORE_2(config)# spanning-tree vlan 30,50,70,90,110,130 root secondary
+CORE_2(config)# end
+CORE_2# write</pre>
+            </div>
+
+            <h4 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.5rem;"><i class="fas fa-shield-alt"></i> 4. Script de Proteção e Alinhamento nas Bases (BASE_1 até BASE_4)</h4>
+            <div class="terminal">
+<pre>! Aplicar esta sequência nas quatro bases alterando o Hostname correspondente
+BASE_1# configure terminal
+BASE_1(config)# hostname BASE_1
+BASE_1(config)# interface range g0/1 - 2
+BASE_1(config-if-range)# switchport mode trunk
+BASE_1(config-if-range)# exit
+! Forçar modo Non-Root permanente elevando a prioridade ao teto
+BASE_1(config)# spanning-tree vlan 30,40,50,60,70,80,90,100,110,120,130,140 priority 61440
+BASE_1(config)# end
+BASE_1# write</pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="secao-justificativa" class="section">
+        <h2 class="section-title">
+            <i class="fas fa-code-branch"></i>
+            <span class="section-number">2.2</span> Justificativa de Comandos e Arquitetura CCNA
+        </h2>
+        <div class="card">
+            <ul style="margin-left: 1.5rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 0.75rem;">
+                <li><strong style="color: var(--text);">interface range gi 0/1 , gi 1/1 ... :</strong> Justificado pelo desenho físico modular das placas do Core do simulador, que mudam o barramento sequencial do slot vertical, impedindo a leitura do hífen.</li>
+                <li><strong style="color: var(--text);">spanning-tree vlan [IDs] priority 61440:</strong> Comando crucial para rebaixar os switches de acesso. Garante que eles operem para sempre como Non-Root, neutralizando falhas que gerariam o famigerado "boi na linha".</li>
+                <li><strong style="color: var(--text);">root primary (24576) / root secondary (28672):</strong> Macros que forçam uma hierarquia determinística e cruzada de backup contínuo por software por instância Per-VLAN.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="download" class="section" style="border-bottom: none;">
+        <div class="download-zone">
+            <i class="fas fa-file-code" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h3>Laboratório Concluído com Sucesso</h3>
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem; font-size: 0.9rem;">Baixe a topologia corrigida, nomeada e com balanço de carga ativo (.pkt) contendo 100% de validação.</p>
+            <a href="lab_final_balanceamento_concluido.pkt" download class="btn-download">
+                <i class="fas fa-cloud-download-alt"></i> Baixar Arquivo .PKT
+            </a>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 - Cisco Networking Academy Clone. Todos os direitos reservados.</p>
+</footer>
+
+<script>
+class SidebarMenu {
+    constructor() {
+        this.sidebar = document.getElementById('sidebar');
+        this.overlay = document.getElementById('sidebarOverlay');
+        this.openBtn = document.getElementById('openMenu');
+        this.closeBtn = document.getElementById('closeMenu');
+        this.init();
+    }
+    init() {
+        if (!this.sidebar) return;
+        if (this.openBtn) this.openBtn.addEventListener('click', () => this.open());
+        if (this.closeBtn) this.closeBtn.addEventListener('click', () => this.close());
+        if (this.overlay) this.overlay.addEventListener('click', () => this.close());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.sidebar.classList.contains('open')) this.close();
+        });
+        document.querySelectorAll('.sidebar .nav-modules a').forEach(link => {
+            link.addEventListener('click', () => this.close());
+        });
+    }
+    open() {
+        this.sidebar.classList.add('open');
+        this.overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    close() {
+        this.sidebar.classList.remove('open');
+        this.overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+document.addEventListener('DOMContentLoaded', () => { new SidebarMenu(); });
+</script>
+</body>
+</html>
